@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotó feltöltése</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 30px 15px; background-color: #f8f9fa; color: #333; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { font-size: 22px; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; margin-bottom: 25px; }
+        .upload-btn { background-color: #28a745; color: white; padding: 16px 24px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: background 0.2s; }
+        .upload-btn:active { background-color: #218838; }
+        #preview { width: 100%; margin-top: 20px; border-radius: 8px; display: none; }
+        #status { margin-top: 20px; font-weight: bold; font-size: 15px; }
+        .spinner { display: none; margin: 15px auto; border: 4px solid #f3f3f3; border-top: 4px solid #28a745; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Készíts egy fotót! 📸</h1>
+    <p>A képed automatikusan feltöltődik a megosztott esküvői mappába.</p>
+
+    <!-- Kamera megnyitása mobilon -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+    <button class="upload-btn" onclick="document.getElementById('cameraInput').click();">Kamera megnyitása</button>
+
+    <img id="preview" alt="Előnézet">
+    <div class="spinner" id="spinner"></div>
+    <div id="status"></div>
+</div>
+
+<script>
+    // IDE MÁSOLD MAJD AZ APPS SCRIPT-BEN KAPOTT WEB APP URL-T:
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyR3Nx4U2xwRJC2-kNiCMyU3Y1QSVzJ7AkG3lsPGCk_ADQpV7moosOlk9oIct2FGJhE2w/exec";
+
+    const fileInput = document.getElementById('cameraInput');
+    const statusDiv = document.getElementById('status');
+    const preview = document.getElementById('preview');
+    const spinner = document.getElementById('spinner');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Előnézet megjelenítése
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+
+        statusDiv.style.color = '#333';
+        statusDiv.innerText = "Kép feldolgozása...";
+        spinner.style.display = 'block';
+
+        // Kép konvertálása Base64 formátumba a küldéshez
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Data = event.target.result.split(',')[1];
+            
+            const payload = {
+                file: base64Data,
+                mimeType: file.type,
+                fileName: "Foto_" + new Date().getTime() + ".jpg"
+            };
+
+            // Küldés a Google Apps Scriptnek
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                spinner.style.display = 'none';
+                if (data.result === 'success') {
+                    statusDiv.style.color = '#28a745';
+                    statusDiv.innerText = "✅ Sikeres feltöltés! Köszönjük!";
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                spinner.style.display = 'none';
+                statusDiv.style.color = '#dc3545';
+                statusDiv.innerText = "❌ Hiba történt a feltöltés során.";
+            });
+        };
+
+        reader.readAsDataURL(file);
+    });
+</script>
+
+</body>
+</html>
