@@ -9,8 +9,14 @@
             box-sizing: border-box; 
         }
 
-        body {
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
             padding: 20px;
             min-height: 100vh;
             display: flex;
@@ -19,12 +25,13 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #333;
 
-            /* Háttérkép beállítása */
-            background-image: url('hatter.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            /* Háttérkép tökéletes kifeszítése a teljes képernyőre */
+            background-image: url('hatter.png');
+            background-size: cover;          /* Kitölti a teljes kijelzőt görgetés és hézag nélkül */
+            background-position: center;     /* Középre igazítja a képet */
+            background-repeat: no-repeat;    /* Nem ismétlődik meg a kép */
+            background-attachment: fixed;    /* Görgetéskor is a helyén marad */
+            background-color: #f0f0f0;       /* Tartalék háttérszín */
         }
 
         /* Elmosódott, félig áttetsző üveghatású panel (Glassmorphism) */
