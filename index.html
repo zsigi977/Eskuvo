@@ -26,7 +26,7 @@
             color: #333;
 
             /* Háttérkép tökéletes kifeszítése a teljes képernyőre */
-            background-image: url('hatter.jpg');
+            background-image: url('hatter.png');
             background-size: cover;          /* Kitölti a teljes kijelzőt görgetés és hézag nélkül */
             background-position: center;     /* Középre igazítja a képet */
             background-repeat: no-repeat;    /* Nem ismétlődik meg a kép */
@@ -62,23 +62,33 @@
             line-height: 1.4;
         }
 
+        /* Gombok stílusa */
         .upload-btn { 
             background-color: #28a745; 
             color: white; 
-            padding: 16px 24px; 
+            padding: 16px 20px; 
             border: none; 
             border-radius: 12px; 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: bold; 
             width: 100%; 
             cursor: pointer; 
             transition: background 0.2s, transform 0.1s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .upload-btn.gallery {
+            background-color: #007bff; /* Kék gomb a galériához a jobb megkülönböztetésért */
         }
 
         .upload-btn:active { 
-            background-color: #218838; 
             transform: scale(0.98);
+            opacity: 0.9;
         }
 
         #preview { 
@@ -115,12 +125,23 @@
 <body>
 
 <div class="container">
-    <h1>Készíts egy fotót! 📸</h1>
-    <p>A képed automatikusan feltöltődik a megosztott esküvői mappába.</p>
+    <h1>Oszd meg a fotóidat! 📸</h1>
+    <p>A feltöltött képek automatikusan bekerülnek az esküvői mappába.</p>
 
-    <!-- Kamera megnyitása mobilon -->
+    <!-- Rejtett beviteli mező a kamerához -->
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
-    <button class="upload-btn" onclick="document.getElementById('cameraInput').click();">Kamera megnyitása</button>
+    
+    <!-- Rejtett beviteli mező a galériához -->
+    <input type="file" id="galleryInput" accept="image/*" style="display: none;">
+
+    <!-- Látható gombok -->
+    <button class="upload-btn" onclick="document.getElementById('cameraInput').click();">
+        📸 Fotó készítése
+    </button>
+    
+    <button class="upload-btn gallery" onclick="document.getElementById('galleryInput').click();">
+        🖼️ Választás a galériából
+    </button>
 
     <img id="preview" alt="Előnézet">
     <div class="spinner" id="spinner"></div>
@@ -130,13 +151,14 @@
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyR3Nx4U2xwRJC2-kNiCMyU3Y1QSVzJ7AkG3lsPGCk_ADQpV7moosOlk9oIct2FGJhE2w/exec";
 
-    const fileInput = document.getElementById('cameraInput');
+    const cameraInput = document.getElementById('cameraInput');
+    const galleryInput = document.getElementById('galleryInput');
     const statusDiv = document.getElementById('status');
     const preview = document.getElementById('preview');
     const spinner = document.getElementById('spinner');
 
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    // Közös feltöltési logika mindkét gombhoz
+    function handleFileUpload(file) {
         if (!file) return;
 
         // Előnézet megjelenítése
@@ -153,7 +175,7 @@
             
             const payload = {
                 file: base64Data,
-                mimeType: file.type,
+                mimeType: file.type || "image/jpeg",
                 fileName: "Eskuvo_" + new Date().getTime() + ".jpg"
             };
 
@@ -180,7 +202,11 @@
         };
 
         reader.readAsDataURL(file);
-    });
+    }
+
+    // Eseményfigyelők mindkét opcióra
+    cameraInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
+    galleryInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
 </script>
 
 </body>
